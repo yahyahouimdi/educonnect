@@ -1,0 +1,12 @@
+# Local configuration (contains secrets)
+.env
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Tooling state
+.github/modernize/
