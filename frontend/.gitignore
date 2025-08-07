@@ -1,0 +1,16 @@
+# Dependencies & build output
+node_modules/
+dist/
+out-tsc/
+coverage/
+.angular/
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# OS / logs
+.DS_Store
+Thumbs.db
+npm-debug.log*
