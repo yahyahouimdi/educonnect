@@ -1,0 +1,58 @@
+<aside class="sidebar" [class.sidebar--open]="sidebarOpen()">
+  <a routerLink="/" class="sidebar__brand">
+    <app-brand [inverse]="true" caption="Digital campus" />
+  </a>
+
+  <nav class="sidebar__nav" aria-label="Workspace navigation">
+    @for (section of sections(); track section.title) {
+      <div class="sidebar__section">
+        <span class="sidebar__title">{{ section.title }}</span>
+        @for (item of section.items; track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: !!item.exact }"
+            class="sidebar__link"
+          >
+            <i [class]="'bi ' + item.icon"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </div>
+    }
+  </nav>
+
+  @if (auth.user(); as user) {
+    <div class="sidebar__user">
+      <span class="avatar">{{ user.fullName | initials }}</span>
+      <div class="sidebar__user-info">
+        <strong class="truncate">{{ user.fullName }}</strong>
+        <small>{{ roleLabel() }}</small>
+      </div>
+      <a routerLink="/app/profile" class="icon-btn" aria-label="My profile" title="My profile">
+        <i class="bi bi-person-gear"></i>
+      </a>
+      <button class="icon-btn" type="button" aria-label="Sign out" title="Sign out" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i>
+      </button>
+    </div>
+  }
+</aside>
+
+@if (sidebarOpen()) {
+  <div class="sidebar-backdrop" (click)="sidebarOpen.set(false)"></div>
+}
+
+<div class="workspace">
+  <header class="topbar">
+    <button class="icon-btn topbar__toggle" type="button" aria-label="Open navigation" (click)="sidebarOpen.set(true)">
+      <i class="bi bi-list"></i>
+    </button>
+    <span class="spacer"></span>
+    <a routerLink="/" class="btn btn--ghost btn--sm"><i class="bi bi-globe2"></i> View website</a>
+  </header>
+
+  <main class="workspace__content">
+    <router-outlet />
+  </main>
+</div>

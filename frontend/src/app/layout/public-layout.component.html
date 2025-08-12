@@ -1,0 +1,109 @@
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a routerLink="/" class="site-header__brand" aria-label="Home">
+      <app-brand />
+    </a>
+
+    <nav class="site-nav" [class.site-nav--open]="menuOpen()" aria-label="Main navigation">
+      @for (link of links; track link.path) {
+        <a
+          [routerLink]="link.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: link.exact }"
+          class="site-nav__link"
+          >{{ link.label }}</a
+        >
+      }
+      <div class="site-nav__cta">
+        @if (auth.isAuthenticated()) {
+          <a [routerLink]="auth.homeRoute()" class="btn btn--primary"><i class="bi bi-grid"></i> My space</a>
+        } @else {
+          <a routerLink="/login" class="btn btn--primary"><i class="bi bi-box-arrow-in-right"></i> Sign in</a>
+        }
+      </div>
+    </nav>
+
+    <button
+      class="icon-btn site-header__toggle"
+      type="button"
+      [attr.aria-expanded]="menuOpen()"
+      aria-label="Toggle navigation"
+      (click)="menuOpen.set(!menuOpen())"
+    >
+      <i class="bi" [class.bi-list]="!menuOpen()" [class.bi-x-lg]="menuOpen()"></i>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <router-outlet />
+</main>
+
+<footer class="site-footer">
+  <div class="container site-footer__grid">
+    <div class="site-footer__about">
+      <app-brand [inverse]="true" />
+      @if (site.info().tagline) {
+        <p>{{ site.info().tagline }}</p>
+      }
+      <div class="site-footer__social">
+        @if (site.info().social.facebook; as url) {
+          <a [href]="url" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        }
+        @if (site.info().social.linkedin; as url) {
+          <a [href]="url" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+        }
+        @if (site.info().social.x; as url) {
+          <a [href]="url" target="_blank" rel="noopener" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+        }
+        @if (site.info().social.youtube; as url) {
+          <a [href]="url" target="_blank" rel="noopener" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        }
+      </div>
+    </div>
+
+    <div>
+      <h4>Explore</h4>
+      <ul>
+        @for (link of links; track link.path) {
+          <li>
+            <a [routerLink]="link.path">{{ link.label }}</a>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <div>
+      <h4>Students</h4>
+      <ul>
+        <li><a routerLink="/login">Learning platform</a></li>
+        <li><a routerLink="/app/resources">Course resources</a></li>
+        <li><a routerLink="/app/chat">Campus chat</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4>Contact</h4>
+      <ul class="site-footer__contact">
+        @if (site.info().address) {
+          <li><i class="bi bi-geo-alt"></i> {{ site.info().address }}</li>
+        }
+        @if (site.info().phone) {
+          <li><i class="bi bi-telephone"></i> {{ site.info().phone }}</li>
+        }
+        @if (site.info().email; as email) {
+          <li>
+            <i class="bi bi-envelope"></i> <a [href]="'mailto:' + email">{{ email }}</a>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="container site-footer__bottom">
+    <span>© {{ year }} {{ site.info().name }}. All rights reserved.</span>
+    <span>Powered by EduConnect</span>
+  </div>
+</footer>
