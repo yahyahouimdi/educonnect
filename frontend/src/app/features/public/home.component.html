@@ -1,0 +1,146 @@
+<section class="hero">
+  <div class="container hero__inner">
+    <div class="hero__copy">
+      <span class="hero__badge"><i class="bi bi-mortarboard-fill"></i> Welcome to {{ site.info().shortName }}</span>
+      <h1>{{ site.info().name }}</h1>
+      <p class="hero__lead">
+        {{ site.info().tagline || 'Quality education, open to everyone.' }}
+        Discover our programs, follow the latest news and continue learning online on our digital campus.
+      </p>
+      <div class="row">
+        <a routerLink="/programs" class="btn btn--light btn--lg">Explore programs <i class="bi bi-arrow-right"></i></a>
+        @if (auth.isAuthenticated()) {
+          <a [routerLink]="auth.homeRoute()" class="btn btn--outline-light btn--lg">Go to my space</a>
+        } @else {
+          <a routerLink="/login" class="btn btn--outline-light btn--lg">Student & staff sign in</a>
+        }
+      </div>
+    </div>
+
+    <div class="hero__panel" aria-hidden="true">
+      <div class="hero__card">
+        <i class="bi bi-journal-check"></i>
+        <div>
+          <strong>Learn at your own pace</strong>
+          <span>Courses, exercises & progress tracking</span>
+        </div>
+      </div>
+      <div class="hero__card hero__card--offset">
+        <i class="bi bi-people"></i>
+        <div>
+          <strong>Stay connected</strong>
+          <span>Chat with teachers and classmates</span>
+        </div>
+      </div>
+      <div class="hero__card">
+        <i class="bi bi-megaphone"></i>
+        <div>
+          <strong>Never miss an update</strong>
+          <span>Official news and announcements</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+@if (stats(); as stats) {
+  <section class="container">
+    <div class="stats card">
+      <div class="stats__item">
+        <strong>{{ stats.students }}</strong>
+        <span>Students</span>
+      </div>
+      <div class="stats__item">
+        <strong>{{ stats.teachers }}</strong>
+        <span>Teachers</span>
+      </div>
+      <div class="stats__item">
+        <strong>{{ stats.courses }}</strong>
+        <span>Online courses</span>
+      </div>
+      <div class="stats__item">
+        <strong>{{ stats.resources }}</strong>
+        <span>Learning resources</span>
+      </div>
+    </div>
+  </section>
+}
+
+<section class="section">
+  <div class="container about-preview">
+    <div>
+      <span class="eyebrow">About us</span>
+      <h2>An institution focused on student success</h2>
+      <p class="text-muted">{{ site.info().about }}</p>
+      <a routerLink="/about" class="btn btn--soft">Learn more about us <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="grid grid--2 highlights">
+      @for (item of highlights; track item.title) {
+        <div class="highlight">
+          <span class="stat__icon"><i [class]="'bi ' + item.icon"></i></span>
+          <h4>{{ item.title }}</h4>
+          <p class="text-muted text-sm mb-0">{{ item.text }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+@if (courses()?.length) {
+  <section class="section section--alt">
+    <div class="container">
+      <div class="row row--between section-head-row">
+        <div class="section-head mb-0">
+          <span class="eyebrow">Programs</span>
+          <h2>Featured courses</h2>
+          <p>Open to our students on the digital campus.</p>
+        </div>
+        <a routerLink="/programs" class="btn btn--ghost">View all programs <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="grid grid--3">
+        @for (course of courses(); track course.id) {
+          <app-course-card [course]="course" />
+        }
+      </div>
+    </div>
+  </section>
+}
+
+@if (news()?.length) {
+  <section class="section">
+    <div class="container">
+      <div class="row row--between section-head-row">
+        <div class="section-head mb-0">
+          <span class="eyebrow">News</span>
+          <h2>Latest announcements</h2>
+        </div>
+        <a routerLink="/news" class="btn btn--ghost">All news <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="grid grid--3">
+        @for (article of news(); track article.id) {
+          <a class="card card--hover news-card" [routerLink]="['/news', article.id]">
+            <div class="card__body">
+              <span class="text-muted text-sm"
+                ><i class="bi bi-calendar3"></i> {{ article.publishedAt | date: 'mediumDate' }}</span
+              >
+              <h3>{{ article.title }}</h3>
+              <p class="text-muted mb-0">{{ article.summary }}</p>
+            </div>
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="cta">
+      <div>
+        <h2>Have a question about admissions?</h2>
+        <p>Our team will be happy to help you find the right program.</p>
+      </div>
+      <a routerLink="/contact" class="btn btn--light btn--lg"><i class="bi bi-envelope"></i> Contact us</a>
+    </div>
+  </div>
+</section>
