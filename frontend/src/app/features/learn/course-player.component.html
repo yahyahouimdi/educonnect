@@ -1,0 +1,156 @@
+@if (notFound()) {
+  <div class="card empty">
+    <i class="bi bi-journal-x"></i>
+    <h3>Course unavailable</h3>
+    <p>This course does not exist or is not published yet.</p>
+    <a routerLink="/app" class="btn btn--primary">Back to my courses</a>
+  </div>
+} @else if (course(); as course) {
+  <nav class="breadcrumb">
+    <a routerLink="/app">My learning</a> <i class="bi bi-chevron-right"></i> {{ course.title }}
+  </nav>
+
+  <div class="page-header">
+    <div>
+      <h1>{{ course.title }}</h1>
+      @if (course.teacherName) {
+        <p><i class="bi bi-person-badge"></i> {{ course.teacherName }}</p>
+      }
+    </div>
+    <div class="course-progress">
+      <div class="row row--between text-sm">
+        <span class="text-muted">Course progress</span>
+        <strong>{{ course.progress.percent }}%</strong>
+      </div>
+      <div class="progress"><div class="progress__bar" [style.width.%]="course.progress.percent"></div></div>
+    </div>
+  </div>
+
+  @if (chapters().length === 0) {
+    <div class="card empty">
+      <i class="bi bi-hourglass"></i>
+      <h3>Content coming soon</h3>
+      <p>The teacher has not added chapters to this course yet.</p>
+    </div>
+  } @else {
+    <div class="player">
+      <aside class="card outline">
+        <div class="card__header"><h3>Chapters</h3></div>
+        <ol>
+          @for (chapter of chapters(); track chapter.id; let i = $index) {
+            <li>
+              <button
+                type="button"
+                class="outline__item"
+                [class.outline__item--active]="i === activeIndex()"
+                [disabled]="i > unlockedUpTo()"
+                (click)="select(i)"
+              >
+                <span class="outline__status">
+                  @if (isChapterComplete(chapter) && chapter.exercises.length) {
+                    <i class="bi bi-check-circle-fill done"></i>
+                  } @else if (i > unlockedUpTo()) {
+                    <i class="bi bi-lock"></i>
+                  } @else {
+                    {{ i + 1 }}
+                  }
+                </span>
+                <span class="outline__title">{{ chapter.title }}</span>
+              </button>
+            </li>
+          }
+        </ol>
+      </aside>
+
+      @if (activeChapter(); as chapter) {
+        <article class="lesson">
+          <div class="card">
+            <div class="card__body">
+              <span class="eyebrow">Chapter {{ activeIndex() + 1 }} of {{ chapters().length }}</span>
+              <h2>{{ chapter.title }}</h2>
+              <div class="prose" [innerHTML]="chapter.content | markdown"></div>
+            </div>
+          </div>
+
+          @if (chapter.exercises.length) {
+            <h3 class="exercises-title"><i class="bi bi-patch-question"></i> Exercises</h3>
+            @for (exercise of chapter.exercises; track exercise.id; let n = $index) {
+              <div class="card exercise" [class.exercise--done]="exercise.completed">
+                <div class="card__body">
+                  <div class="row row--between">
+                    <span class="badge" [class.badge--success]="exercise.completed">
+                      @if (exercise.completed) {
+                        <i class="bi bi-check2"></i> Solved
+                      } @else {
+                        Question {{ n + 1 }}
+                      }
+                    </span>
+                    @if (exercise.hint) {
+                      <button class="btn btn--ghost btn--sm" type="button" (click)="toggleHint(exercise.id)">
+                        <i class="bi bi-lightbulb"></i> {{ revealedHints().has(exercise.id) ? 'Hide hint' : 'Hint' }}
+                      </button>
+                    }
+                  </div>
+                  <p class="question">{{ exercise.question }}</p>
+                  @if (revealedHints().has(exercise.id)) {
+                    <div class="alert alert--warning"><i class="bi bi-lightbulb"></i> {{ exercise.hint }}</div>
+                  }
+                  @if (!exercise.completed) {
+                    <form class="answer" (ngSubmit)="submit(exercise)">
+                      <input
+                        class="input"
+                        [name]="'answer-' + exercise.id"
+                        placeholder="Your answer…"
+                        autocomplete="off"
+                        [ngModel]="answers()[exercise.id] ?? ''"
+                        (ngModelChange)="setAnswer(exercise.id, $event)"
+                      />
+                      <button
+                        class="btn btn--primary"
+                        type="submit"
+                        [disabled]="submitting() === exercise.id || !(answers()[exercise.id] ?? '').trim()"
+                      >
+                        @if (submitting() === exercise.id) {
+                          <span class="spinner spinner--sm"></span>
+                        }
+                        Check
+                      </button>
+                    </form>
+                    @if (feedback()[exercise.id] === 'wrong') {
+                      <div class="alert alert--danger mt-2">
+                        <i class="bi bi-x-circle"></i> Not quite. Read the chapter again and give it another try.
+                      </div>
+                    }
+                  } @else if (feedback()[exercise.id] === 'correct') {
+                    <div class="alert alert--success"><i class="bi bi-check-circle"></i> Correct, well done!</div>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+          <div class="row row--between nav-buttons">
+            <button class="btn" type="button" [disabled]="activeIndex() === 0" (click)="select(activeIndex() - 1)">
+              <i class="bi bi-arrow-left"></i> Previous
+            </button>
+            @if (activeIndex() < chapters().length - 1) {
+              <button
+                class="btn btn--primary"
+                type="button"
+                [disabled]="activeIndex() + 1 > unlockedUpTo()"
+                [title]="activeIndex() + 1 > unlockedUpTo() ? 'Solve every exercise to unlock the next chapter' : ''"
+                (click)="select(activeIndex() + 1)"
+              >
+                Next chapter <i class="bi bi-arrow-right"></i>
+              </button>
+            } @else {
+              <a routerLink="/app" class="btn btn--soft">Back to my courses</a>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+} @else {
+  <div class="loading"><span class="spinner"></span></div>
+}

@@ -1,0 +1,138 @@
+.course-progress {
+  width: min(100%, 280px);
+  .progress {
+    margin-top: 6px;
+  }
+}
+
+.player {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.outline {
+  position: sticky;
+  top: 76px;
+
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 8px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    color: var(--ink-2);
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: var(--surface-3);
+    }
+    &:disabled {
+      cursor: not-allowed;
+      color: var(--muted);
+    }
+    &--active {
+      background: var(--brand-50);
+      color: var(--brand-700);
+      font-weight: 600;
+      .outline__status {
+        background: var(--brand);
+        color: #fff;
+      }
+    }
+  }
+
+  &__status {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    .done {
+      color: var(--success);
+      font-size: 1.1rem;
+    }
+  }
+  &__item--active .done {
+    color: #fff;
+  }
+
+  &__title {
+    min-width: 0;
+  }
+}
+
+.lesson {
+  min-width: 0;
+  .prose {
+    font-size: 1.02rem;
+  }
+}
+
+.exercises-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 28px 0 12px;
+  i {
+    color: var(--brand);
+  }
+}
+
+.exercise {
+  margin-bottom: 12px;
+  border-left: 4px solid var(--brand-200);
+
+  &--done {
+    border-left-color: var(--success);
+  }
+  .question {
+    margin: 12px 0;
+    font-weight: 500;
+    font-size: 1.02rem;
+    white-space: pre-line;
+  }
+}
+
+.answer {
+  display: flex;
+  gap: 10px;
+  .input {
+    flex: 1;
+  }
+}
+
+.nav-buttons {
+  margin-top: 24px;
+}
+
+@media (max-width: 960px) {
+  .player {
+    grid-template-columns: 1fr;
+  }
+  .outline {
+    position: static;
+  }
+}
+
+@media (max-width: 520px) {
+  .answer {
+    flex-direction: column;
+  }
+}
