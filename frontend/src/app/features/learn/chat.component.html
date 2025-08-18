@@ -1,0 +1,102 @@
+<div class="page-header">
+  <div>
+    <h1>Chat</h1>
+    <p>Discuss with classmates and teachers in real time.</p>
+  </div>
+  <span
+    class="badge"
+    [class.badge--success]="socket.state() === 'connected'"
+    [class.badge--warning]="socket.state() === 'connecting'"
+    [class.badge--danger]="socket.state() === 'disconnected'"
+  >
+    <i class="bi bi-circle-fill dot"></i>
+    {{ socket.state() === 'connected' ? 'Connected' : socket.state() === 'connecting' ? 'Connecting…' : 'Offline' }}
+  </span>
+</div>
+
+<div class="chat card">
+  <aside class="rooms" [class.rooms--open]="roomsOpen()">
+    <div class="rooms__title">Rooms</div>
+    @for (room of rooms(); track room.id) {
+      <button type="button" class="room" [class.room--active]="room.id === activeRoom()?.id" (click)="open(room)">
+        <span class="room__icon"
+          ><i class="bi" [class.bi-megaphone]="room.id === 'general'" [class.bi-hash]="room.id !== 'general'"></i
+        ></span>
+        <span class="room__text">
+          <strong class="truncate">{{ room.name }}</strong>
+          <small class="truncate">{{ room.description }}</small>
+        </span>
+      </button>
+    }
+  </aside>
+
+  <section class="conversation">
+    @if (activeRoom(); as room) {
+      <header class="conversation__header">
+        <button
+          class="icon-btn rooms-toggle"
+          type="button"
+          aria-label="Show rooms"
+          (click)="roomsOpen.set(!roomsOpen())"
+        >
+          <i class="bi bi-list"></i>
+        </button>
+        <div>
+          <strong>{{ room.name }}</strong>
+          <div class="text-muted text-sm">{{ room.description }}</div>
+        </div>
+      </header>
+
+      <div class="messages" #scroller>
+        @if (loadingHistory()) {
+          <div class="loading"><span class="spinner"></span></div>
+        } @else if (messages().length === 0) {
+          <div class="empty">
+            <i class="bi bi-chat-square-text"></i>
+            <h3>No messages yet</h3>
+            <p>Be the first to say hello!</p>
+          </div>
+        }
+        @for (message of messages(); track message.id; let i = $index) {
+          <div class="message" [class.message--mine]="isMine(message)" [class.message--grouped]="!startsGroup(i)">
+            @if (!isMine(message)) {
+              <span class="avatar" [class.avatar--hidden]="!startsGroup(i)">{{ message.senderName | initials }}</span>
+            }
+            <div class="message__body">
+              @if (startsGroup(i) && !isMine(message)) {
+                <div class="message__meta">
+                  <strong>{{ message.senderName }}</strong>
+                  @if (message.senderRole !== 'STUDENT') {
+                    <span class="badge badge--brand">{{ message.senderRole === 'ADMIN' ? 'Admin' : 'Teacher' }}</span>
+                  }
+                </div>
+              }
+              <div class="bubble">
+                {{ message.content }}
+                <time [attr.datetime]="message.sentAt">{{ message.sentAt | date: 'shortTime' }}</time>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <form class="composer" (ngSubmit)="send()">
+        <input
+          class="input"
+          name="message"
+          placeholder="Write a message…"
+          autocomplete="off"
+          maxlength="2000"
+          [ngModel]="draft()"
+          (ngModelChange)="draft.set($event)"
+          aria-label="Message"
+        />
+        <button class="btn btn--primary" type="submit" [disabled]="!canSend()">
+          <i class="bi bi-send"></i> <span class="send-label">Send</span>
+        </button>
+      </form>
+    } @else {
+      <div class="loading"><span class="spinner"></span></div>
+    }
+  </section>
+</div>
