@@ -1,0 +1,150 @@
+<form [formGroup]="form" (ngSubmit)="save()" novalidate>
+  <div class="page-header">
+    <div>
+      <h1>Institution settings</h1>
+      <p>Identity and contact details displayed across the website.</p>
+    </div>
+    <button class="btn btn--primary" type="submit" [disabled]="saving() || form.pristine">
+      @if (saving()) {
+        <span class="spinner spinner--sm"></span>
+      }
+      Save changes
+    </button>
+  </div>
+
+  <div class="layout">
+    <div class="stack">
+      <div class="card">
+        <div class="card__header"><h3>Identity</h3></div>
+        <div class="card__body">
+          <div class="form-grid">
+            <div class="field">
+              <label for="name">Institution name</label>
+              <input id="name" class="input" formControlName="name" />
+            </div>
+            <div class="field">
+              <label for="shortName">Short name / acronym</label>
+              <input id="shortName" class="input" formControlName="shortName" />
+              <span class="hint">Used in the header, browser tab and logo badge.</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="tagline">Tagline</label>
+            <input
+              id="tagline"
+              class="input"
+              formControlName="tagline"
+              placeholder="e.g. Excellence in engineering since 1990"
+            />
+          </div>
+          <div class="field mb-0">
+            <label for="about">About the institution</label>
+            <textarea id="about" class="textarea" rows="7" formControlName="about"></textarea>
+            <span class="hint">Shown on the home and About pages. Markdown is supported.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__header"><h3>Contact details</h3></div>
+        <div class="card__body">
+          <div class="form-grid">
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" class="input" type="email" formControlName="email" />
+            </div>
+            <div class="field">
+              <label for="phone">Phone</label>
+              <input id="phone" class="input" formControlName="phone" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="address">Address</label>
+            <input id="address" class="input" formControlName="address" />
+          </div>
+          <div class="field mb-0">
+            <label for="website">Main website (optional)</label>
+            <input id="website" class="input" formControlName="website" placeholder="https://" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__header"><h3>Social networks</h3></div>
+        <div class="card__body form-grid">
+          <div class="field">
+            <label for="facebook"><i class="bi bi-facebook"></i> Facebook</label>
+            <input id="facebook" class="input" formControlName="facebookUrl" placeholder="https://facebook.com/…" />
+          </div>
+          <div class="field">
+            <label for="linkedin"><i class="bi bi-linkedin"></i> LinkedIn</label>
+            <input id="linkedin" class="input" formControlName="linkedinUrl" placeholder="https://linkedin.com/…" />
+          </div>
+          <div class="field">
+            <label for="x"><i class="bi bi-twitter-x"></i> X</label>
+            <input id="x" class="input" formControlName="xUrl" placeholder="https://x.com/…" />
+          </div>
+          <div class="field">
+            <label for="youtube"><i class="bi bi-youtube"></i> YouTube</label>
+            <input id="youtube" class="input" formControlName="youtubeUrl" placeholder="https://youtube.com/…" />
+          </div>
+          @if (form.invalid && form.touched) {
+            <span class="error">Links must start with http:// or https://</span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <aside class="stack">
+      <div class="card">
+        <div class="card__header"><h3>Logo</h3></div>
+        <div class="card__body stack">
+          <div class="logo-preview"><app-brand [showName]="false" /></div>
+          <input
+            #logoInput
+            type="file"
+            accept="image/png,image/jpeg,image/gif,image/webp"
+            class="sr-only"
+            id="logo"
+            (change)="onLogoSelected($event)"
+          />
+          <label for="logo" class="btn btn--soft btn--block">
+            @if (uploading()) {
+              <span class="spinner spinner--sm"></span>
+            } @else {
+              <i class="bi bi-upload"></i>
+            }
+            Upload logo
+          </label>
+          @if (site.info().logoUrl) {
+            <button class="btn btn--ghost btn--block" type="button" (click)="removeLogo()">Remove logo</button>
+          }
+          <span class="text-muted text-sm">PNG, JPEG, GIF or WebP. A square or wide transparent image works best.</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__header"><h3>Brand color</h3></div>
+        <div class="card__body">
+          <div class="color-input">
+            <input type="color" formControlName="primaryColor" aria-label="Pick a color" />
+            <input class="input" formControlName="primaryColor" aria-label="Hex color" />
+          </div>
+          <div class="swatches" role="group" aria-label="Suggested colors">
+            @for (color of swatches; track color) {
+              <button
+                type="button"
+                [style.background]="color"
+                [attr.aria-label]="color"
+                (click)="pickColor(color)"
+              ></button>
+            }
+          </div>
+          <p class="text-muted text-sm mt-2 mb-0">
+            The whole interface previews the color live. Save to apply it for everyone.
+          </p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</form>
