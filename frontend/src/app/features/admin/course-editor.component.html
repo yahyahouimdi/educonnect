@@ -1,0 +1,239 @@
+@if (course(); as course) {
+  <nav class="breadcrumb">
+    <a routerLink="/admin/courses">Courses</a> <i class="bi bi-chevron-right"></i> {{ course.title }}
+  </nav>
+  <div class="page-header">
+    <div>
+      <h1>{{ course.title }}</h1>
+      <p>
+        <span class="badge" [class.badge--success]="course.published">{{
+          course.published ? 'Published' : 'Draft'
+        }}</span>
+        {{ chapters().length }} chapters
+      </p>
+    </div>
+    <div class="row">
+      <a class="btn" [routerLink]="['/app/courses', course.id]"><i class="bi bi-eye"></i> Preview</a>
+      <button class="btn btn--ghost" type="button" (click)="deleteCourse()"><i class="bi bi-trash"></i> Delete</button>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" type="button" [class.active]="tab() === 'content'" (click)="tab.set('content')">
+      <i class="bi bi-list-nested"></i> Chapters & exercises
+    </button>
+    <button role="tab" type="button" [class.active]="tab() === 'details'" (click)="tab.set('details')">
+      <i class="bi bi-info-circle"></i> Course details
+    </button>
+  </div>
+
+  @if (tab() === 'details') {
+    <div class="card details">
+      <div class="card__body">
+        <app-course-form
+          [course]="course"
+          [saving]="savingCourse()"
+          [showCancel]="false"
+          submitLabel="Save details"
+          (save)="saveCourse($event)"
+        />
+      </div>
+    </div>
+  } @else {
+    <div class="editor">
+      <aside class="card chapters">
+        <div class="card__header">
+          <h3>Chapters</h3>
+          <button class="btn btn--soft btn--sm" type="button" (click)="addChapter()">
+            <i class="bi bi-plus-lg"></i> Add
+          </button>
+        </div>
+        @if (chapters().length === 0) {
+          <p class="text-muted text-sm chapters__empty">No chapters yet. Add the first one.</p>
+        }
+        <ol>
+          @for (chapter of chapters(); track chapter.id; let i = $index) {
+            <li>
+              <button
+                type="button"
+                class="chapters__item"
+                [class.chapters__item--active]="chapter.id === selectedChapterId()"
+                (click)="selectedChapterId.set(chapter.id)"
+              >
+                <span class="chapters__index">{{ i + 1 }}</span>
+                <span class="chapters__title">
+                  <span class="truncate">{{ chapter.title }}</span>
+                  <small>{{ chapter.exerciseCount }} exercises</small>
+                </span>
+              </button>
+            </li>
+          }
+        </ol>
+      </aside>
+
+      @if (selectedChapter(); as chapter) {
+        <section class="stack">
+          <form class="card" [formGroup]="chapterForm" (ngSubmit)="saveChapter()" novalidate>
+            <div class="card__header">
+              <h3>Lesson</h3>
+              <div class="row">
+                <button
+                  class="icon-btn icon-btn--danger"
+                  type="button"
+                  title="Delete chapter"
+                  aria-label="Delete chapter"
+                  (click)="deleteChapter()"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+                <button
+                  class="btn btn--primary btn--sm"
+                  type="submit"
+                  [disabled]="chapterForm.invalid || savingChapter()"
+                >
+                  @if (savingChapter()) {
+                    <span class="spinner spinner--sm"></span>
+                  }
+                  Save chapter
+                </button>
+              </div>
+            </div>
+            <div class="card__body">
+              <div class="chapter-meta">
+                <div class="field">
+                  <label for="chapter-title">Title</label>
+                  <input id="chapter-title" class="input" formControlName="title" />
+                </div>
+                <div class="field">
+                  <label for="chapter-position">Order</label>
+                  <input id="chapter-position" class="input" type="number" min="0" formControlName="position" />
+                </div>
+              </div>
+              <div class="field mb-0">
+                <div class="row row--between">
+                  <label for="chapter-content">Content</label>
+                  <div class="segmented">
+                    <button type="button" [class.active]="!preview()" (click)="preview.set(false)">Write</button>
+                    <button type="button" [class.active]="preview()" (click)="preview.set(true)">Preview</button>
+                  </div>
+                </div>
+                @if (preview()) {
+                  <div class="prose preview" [innerHTML]="chapterForm.controls.content.value | markdown"></div>
+                } @else {
+                  <textarea
+                    id="chapter-content"
+                    class="textarea textarea--code"
+                    formControlName="content"
+                    placeholder="## Introduction&#10;&#10;Write the lesson in Markdown: headings, lists, **bold**, code blocks, tables…"
+                  ></textarea>
+                }
+                <span class="hint">Markdown is supported: headings, lists, links, images, tables and code blocks.</span>
+              </div>
+            </div>
+          </form>
+
+          <div class="card">
+            <div class="card__header">
+              <h3>Exercises</h3>
+              <button class="btn btn--soft btn--sm" type="button" (click)="openExercise('new')">
+                <i class="bi bi-plus-lg"></i> Add exercise
+              </button>
+            </div>
+            @if (exercises().length === 0) {
+              <div class="empty">
+                <i class="bi bi-patch-question"></i>
+                <p>No exercises yet. Students unlock the next chapter by solving every exercise of this one.</p>
+              </div>
+            } @else {
+              <div class="table-wrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Question</th>
+                      <th>Expected answer</th>
+                      <th class="actions"><span class="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (exercise of exercises(); track exercise.id) {
+                      <tr>
+                        <td class="text-muted">{{ exercise.position }}</td>
+                        <td>{{ exercise.question }}</td>
+                        <td>
+                          <code>{{ exercise.answer }}</code>
+                        </td>
+                        <td class="actions">
+                          <button class="icon-btn" type="button" aria-label="Edit" (click)="openExercise(exercise)">
+                            <i class="bi bi-pencil"></i>
+                          </button>
+                          <button
+                            class="icon-btn icon-btn--danger"
+                            type="button"
+                            aria-label="Delete"
+                            (click)="deleteExercise(exercise)"
+                          >
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        </section>
+      } @else {
+        <div class="card empty">
+          <i class="bi bi-journal-text"></i>
+          <h3>Add your first chapter</h3>
+          <p>Chapters contain the lesson content and the exercises students must solve.</p>
+          <button class="btn btn--primary" type="button" (click)="addChapter()">Add chapter</button>
+        </div>
+      }
+    </div>
+  }
+
+  @if (exerciseDialog(); as target) {
+    <app-modal [title]="target === 'new' ? 'New exercise' : 'Edit exercise'" (closed)="exerciseDialog.set(null)">
+      <form id="exercise-form" [formGroup]="exerciseForm" (ngSubmit)="saveExercise()" novalidate>
+        <div class="field">
+          <label for="exercise-question">Question</label>
+          <textarea id="exercise-question" class="textarea" rows="3" formControlName="question"></textarea>
+        </div>
+        <div class="field">
+          <label for="exercise-answer">Expected answer</label>
+          <input id="exercise-answer" class="input" formControlName="answer" />
+          <span class="hint">
+            Comparison ignores case, accents and extra spaces. Separate alternative answers with
+            <code>|</code>, e.g. <code>JVM|Java Virtual Machine</code>.
+          </span>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="exercise-hint">Hint (optional)</label>
+            <input id="exercise-hint" class="input" formControlName="hint" />
+          </div>
+          <div class="field">
+            <label for="exercise-position">Order</label>
+            <input id="exercise-position" class="input" type="number" min="0" formControlName="position" />
+          </div>
+        </div>
+      </form>
+      <ng-container modal-footer>
+        <button class="btn btn--ghost" type="button" (click)="exerciseDialog.set(null)">Cancel</button>
+        <button
+          class="btn btn--primary"
+          type="submit"
+          form="exercise-form"
+          [disabled]="exerciseForm.invalid || savingExercise()"
+        >
+          Save exercise
+        </button>
+      </ng-container>
+    </app-modal>
+  }
+} @else {
+  <div class="loading"><span class="spinner"></span></div>
+}
