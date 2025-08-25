@@ -1,0 +1,13 @@
+# Development overlay: exposes MySQL and the API on the host so you can run the backend from your
+# IDE and the frontend with `ng serve` (hot reload).
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
+#
+services:
+  db:
+    ports:
+      - "3306:3306"
+
+  backend:
+    ports:
+      - "8081:8080"

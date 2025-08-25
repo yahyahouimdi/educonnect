@@ -1,0 +1,77 @@
+# EduConnect — full stack in one command:
+#
+#   cp .env.example .env   # optional: customize your institution and secrets
+#   docker compose up -d --build
+#
+# Then open http://localhost:8080 (or the APP_PORT you configured).
+
+name: educonnect
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-educonnect}
+      MYSQL_USER: ${DB_USERNAME:-educonnect}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-educonnect}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-educonnect-root}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  backend:
+    image: ${IMAGE_REGISTRY:-educonnect}/educonnect-backend:${IMAGE_TAG:-latest}
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db:3306/${DB_NAME:-educonnect}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: ${DB_USERNAME:-educonnect}
+      DB_PASSWORD: ${DB_PASSWORD:-educonnect}
+      JWT_SECRET: ${JWT_SECRET:-change-me-this-is-a-development-only-secret-of-at-least-64-characters!!}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-PT12H}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4200}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@educonnect.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@12345}
+      ADMIN_NAME: ${ADMIN_NAME:-Platform Administrator}
+      DEMO_DATA: ${DEMO_DATA:-true}
+      INSTITUTION_NAME: ${INSTITUTION_NAME:-EduConnect Academy}
+      INSTITUTION_SHORT_NAME: ${INSTITUTION_SHORT_NAME:-EduConnect}
+      INSTITUTION_TAGLINE: ${INSTITUTION_TAGLINE:-Learn. Connect. Grow.}
+      INSTITUTION_EMAIL: ${INSTITUTION_EMAIL:-contact@educonnect.local}
+      INSTITUTION_PHONE: ${INSTITUTION_PHONE:-+000 00 000 000}
+      INSTITUTION_ADDRESS: ${INSTITUTION_ADDRESS:-1 Campus Avenue, Your City}
+      INSTITUTION_PRIMARY_COLOR: ${INSTITUTION_PRIMARY_COLOR:-#1d4ed8}
+      UPLOAD_MAX_FILE_SIZE: ${UPLOAD_MAX_FILE_SIZE:-50MB}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-gemini-2.5-flash}
+    volumes:
+      - uploads:/app/data/uploads
+
+  frontend:
+    image: ${IMAGE_REGISTRY:-educonnect}/educonnect-frontend:${IMAGE_TAG:-latest}
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      BACKEND_URL: http://backend:8080
+      UPLOAD_MAX_BODY_SIZE: ${UPLOAD_MAX_BODY_SIZE:-50m}
+    ports:
+      - "${APP_PORT:-8080}:80"
+
+volumes:
+  db-data:
+  uploads:
