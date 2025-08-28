@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    actor S as Student
+    participant P as Course player
+    participant LC as LearningController
+    participant LS as LearningService
+    participant AM as AnswerMatcher
+    participant DB as MySQL
+    S->>P: types an answer, clicks Check
+    P->>LC: POST /api/v1/learning/exercises/{id}/attempts
+    LC->>LS: submitAnswer(id, answer, user)
+    LS->>DB: load exercise and its course (published?)
+    LS->>AM: matches(expected, given)
+    AM-->>LS: ignores case, accents and spaces, tries each alternative
+    alt correct and not completed yet
+        LS->>DB: INSERT exercise_completion
+    end
+    LS->>DB: count completed exercises of the course
+    LS-->>P: correct + course progress
+    P->>P: feedback, progress bar, unlock next chapter

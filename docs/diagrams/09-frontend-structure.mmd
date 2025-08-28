@@ -1,0 +1,22 @@
+flowchart TB
+    APP["AppComponent<br/>router outlet · notifications"]
+    subgraph pub["PublicLayout — /"]
+        P1["home · about · programs · programs/:id"]
+        P2["news · news/:id · contact · login"]
+    end
+    subgraph ws["WorkspaceLayout"]
+        L["/app — authGuard<br/>dashboard · courses/:id · resources<br/>chat · assistant · profile"]
+        AD["/admin — roleGuard ADMIN, TEACHER<br/>overview · courses · course editor · resources<br/>users · news · messages · settings (ADMIN only)"]
+    end
+    subgraph core["core/"]
+        AS["AuthService (signals)"]
+        SS["SiteService<br/>branding → CSS variables"]
+        API["PublicApi · LearningApi · AdminApi"]
+        INT["authInterceptor"]
+        GU["auth / role / guest guards"]
+        CS["ChatSocketService (STOMP)"]
+    end
+    SH["shared/<br/>modal · pager · brand · page banner<br/>markdown and format pipes"]
+    APP --> pub & ws
+    pub & ws --> SH
+    pub & ws --> core

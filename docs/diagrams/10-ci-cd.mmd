@@ -1,0 +1,7 @@
+flowchart LR
+    DEV["git push / pull request"] --> GH["GitHub Actions"]
+    GH --> B["Backend job<br/>JDK 17 · mvn verify<br/>21 unit and integration tests"]
+    GH --> F["Frontend job<br/>Node 22 · Prettier check<br/>13 unit tests · production build"]
+    B & F --> I["Images job<br/>Docker Buildx with cache"]
+    I -- "main branch or v* tag" --> R[("GitHub Container Registry<br/>educonnect-backend<br/>educonnect-frontend")]
+    R --> D["Any server<br/>docker compose pull and up -d"]

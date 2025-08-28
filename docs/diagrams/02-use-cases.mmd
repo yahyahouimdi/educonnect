@@ -1,0 +1,29 @@
+flowchart LR
+    V(["👤 Visitor"])
+    S(["🎓 Student"])
+    T(["🧑‍🏫 Teacher"])
+    AD(["🛡️ Administrator"])
+    subgraph sys["EduConnect"]
+        direction TB
+        UC1(["Browse website, programs & news"])
+        UC2(["Send a contact message"])
+        UC3(["Sign in / change password"])
+        UC4(["Follow a course & solve exercises"])
+        UC5(["Track progress"])
+        UC6(["Download resources"])
+        UC7(["Chat in real time"])
+        UC8(["Ask the AI assistant"])
+        UC9(["Manage own courses, chapters & exercises"])
+        UC10(["Upload resources"])
+        UC11(["Manage users & roles"])
+        UC12(["Publish news"])
+        UC13(["Read contact inbox"])
+        UC14(["Configure institution branding"])
+    end
+    V --> UC1 & UC2 & UC3
+    S --> UC4 & UC5 & UC6 & UC7 & UC8
+    T --> UC9 & UC10
+    AD --> UC11 & UC12 & UC13 & UC14
+    S -. "is a" .-> V
+    T -. "is a" .-> S
+    AD -. "is a (all courses)" .-> T

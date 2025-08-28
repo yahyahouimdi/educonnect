@@ -1,0 +1,88 @@
+erDiagram
+    users ||--o{ courses : "teaches"
+    courses ||--o{ chapters : "contains"
+    chapters ||--o{ exercises : "contains"
+    users ||--o{ exercise_completions : "completes"
+    exercises ||--o{ exercise_completions : "is completed in"
+    courses |o--o{ resources : "groups"
+    users |o--o{ resources : "uploads"
+    users |o--o{ news_articles : "writes"
+    users |o--o{ chat_messages : "sends"
+    users {
+        BIGINT id PK
+        VARCHAR full_name
+        VARCHAR email UK
+        VARCHAR password_hash
+        VARCHAR role
+        BOOLEAN enabled
+    }
+    courses {
+        BIGINT id PK
+        VARCHAR title
+        VARCHAR summary
+        TEXT description
+        VARCHAR category
+        BOOLEAN published
+        INT position
+        BIGINT teacher_id FK
+    }
+    chapters {
+        BIGINT id PK
+        BIGINT course_id FK
+        VARCHAR title
+        MEDIUMTEXT content
+        INT position
+    }
+    exercises {
+        BIGINT id PK
+        BIGINT chapter_id FK
+        TEXT question
+        VARCHAR answer
+        VARCHAR hint
+        INT position
+    }
+    exercise_completions {
+        BIGINT id PK
+        BIGINT user_id FK
+        BIGINT exercise_id FK
+    }
+    resources {
+        BIGINT id PK
+        VARCHAR title
+        VARCHAR original_filename
+        VARCHAR stored_filename UK
+        VARCHAR content_type
+        BIGINT size_bytes
+        BIGINT course_id FK
+        BIGINT uploaded_by_id FK
+    }
+    news_articles {
+        BIGINT id PK
+        VARCHAR title
+        MEDIUMTEXT content
+        BOOLEAN published
+        DATETIME published_at
+        BIGINT author_id FK
+    }
+    chat_messages {
+        BIGINT id PK
+        VARCHAR room
+        BIGINT sender_id FK
+        VARCHAR sender_name
+        VARCHAR content
+    }
+    site_settings {
+        BIGINT id PK
+        VARCHAR name
+        VARCHAR short_name
+        VARCHAR primary_color
+        VARCHAR logo_filename
+    }
+    contact_messages {
+        BIGINT id PK
+        VARCHAR name
+        VARCHAR email
+        VARCHAR subject
+        TEXT message
+        BOOLEAN is_read
+    }

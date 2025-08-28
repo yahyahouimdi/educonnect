@@ -1,0 +1,23 @@
+flowchart LR
+    U(["👤 Browser<br/>visitors · students · staff"])
+    subgraph host["Docker host — docker compose"]
+        direction LR
+        subgraph fe["frontend container"]
+            N["Nginx 1.27<br/>Angular 20 SPA<br/>reverse proxy · CSP · gzip"]
+        end
+        subgraph be["backend container"]
+            A["Spring Boot 3.5 · Java 17<br/>REST API · STOMP WebSocket<br/>JWT security · Flyway"]
+        end
+        subgraph dbc["db container"]
+            M[("MySQL 8.4")]
+        end
+        V[("uploads volume")]
+        DV[("db-data volume")]
+    end
+    G["Google Gemini API<br/>(optional)"]
+    U -- "HTTP(S) :8080" --> N
+    N -- "/api/** · /ws" --> A
+    A -- "JDBC" --> M
+    M --- DV
+    A -- "file I/O" --> V
+    A -. "HTTPS, server-side key" .-> G

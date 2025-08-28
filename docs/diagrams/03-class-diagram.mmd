@@ -1,0 +1,82 @@
+classDiagram
+    direction LR
+    note "All entities extend BaseEntity: id, createdAt, updatedAt"
+    class User {
+        String fullName
+        String email
+        String passwordHash
+        Role role
+        boolean enabled
+    }
+    class Role {
+        <<enumeration>>
+        ADMIN
+        TEACHER
+        STUDENT
+    }
+    class Course {
+        String title
+        String summary
+        String description
+        String category
+        boolean published
+        int position
+        exerciseCount() int
+    }
+    class Chapter {
+        String title
+        String content
+        int position
+    }
+    class Exercise {
+        String question
+        String answer
+        String hint
+        int position
+    }
+    class ExerciseCompletion
+    class LearningResource {
+        String title
+        String originalFilename
+        String storedFilename
+        String contentType
+        long sizeBytes
+    }
+    class NewsArticle {
+        String title
+        String summary
+        String content
+        boolean published
+        Instant publishedAt
+    }
+    class SiteSettings {
+        String name
+        String shortName
+        String tagline
+        String primaryColor
+        String logoFilename
+        String contactAndSocialLinks
+    }
+    class ContactMessage {
+        String name
+        String email
+        String subject
+        String message
+        boolean read
+    }
+    class ChatMessage {
+        String room
+        String senderName
+        Role senderRole
+        String content
+    }
+    User --> Role
+    Course "0..*" --> "0..1" User : teacher
+    Course "1" *-- "0..*" Chapter : chapters
+    Chapter "1" *-- "0..*" Exercise : exercises
+    ExerciseCompletion "0..*" --> "1" User : learner
+    ExerciseCompletion "0..*" --> "1" Exercise
+    LearningResource "0..*" --> "0..1" Course
+    LearningResource "0..*" --> "0..1" User : uploadedBy
+    NewsArticle "0..*" --> "0..1" User : author
+    ChatMessage "0..*" --> "0..1" User : sender

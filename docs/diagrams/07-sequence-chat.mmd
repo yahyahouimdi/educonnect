@@ -1,0 +1,18 @@
+sequenceDiagram
+    autonumber
+    actor A as Student
+    actor B as Teacher
+    participant INT as STOMP interceptor (/ws)
+    participant CC as ChatController
+    participant DB as MySQL
+    participant BR as Message broker
+    A->>INT: CONNECT with Authorization Bearer JWT
+    INT-->>A: CONNECTED (ERROR if the token is invalid)
+    A->>BR: SUBSCRIBE /topic/rooms/general
+    B->>BR: SUBSCRIBE /topic/rooms/general
+    A->>CC: SEND /app/chat/general
+    CC->>DB: persist message (room, sender, role)
+    CC->>BR: publish to /topic/rooms/general
+    BR-->>A: MESSAGE
+    BR-->>B: MESSAGE
+    Note over A,B: history: GET /api/v1/chat/rooms/{room}/messages (last 100)

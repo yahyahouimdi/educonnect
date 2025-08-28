@@ -1,0 +1,22 @@
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant SPA as Angular SPA
+    participant NG as Nginx
+    participant SEC as JwtAuthenticationFilter
+    participant AUTH as AuthService
+    participant DB as MySQL
+    U->>SPA: email + password
+    SPA->>NG: POST /api/v1/auth/login
+    NG->>AUTH: proxied request
+    AUTH->>DB: find user by email
+    DB-->>AUTH: user (BCrypt hash, role, enabled)
+    AUTH->>AUTH: verify password, account enabled
+    AUTH-->>SPA: 200 accessToken (JWT HS256), expiresAt, user
+    SPA->>SPA: store session, route by role (/app or /admin)
+    Note over SPA,SEC: every later request
+    SPA->>NG: GET /api/v1/learning/progress (Authorization: Bearer JWT)
+    NG->>SEC: proxied request
+    SEC->>SEC: verify signature and expiry
+    SEC->>DB: reload user (disabling or role changes apply instantly)
+    SEC-->>SPA: 200 data, or 401 and the SPA signs out
